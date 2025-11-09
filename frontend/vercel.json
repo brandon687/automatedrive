@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "devCommand": "npm run dev",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "env": {
+    "VITE_API_URL": "https://automatedrive-production.up.railway.app/api"
+  }
+}

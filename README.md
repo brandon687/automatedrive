@@ -1,29 +1,42 @@
-# DealerTrade - Vehicle Appraisal Platform
+# DealerTrade - Vehicle Appraisal Platform 🚗
 
-A modern, streamlined vehicle appraisal submission system that allows users to easily submit their vehicle information and media for dealer quotes. Features include VIN decoding, multi-file uploads, ticketing system, and dealer partner portal.
+A modern, production-ready vehicle appraisal submission system with **license plate to VIN lookup**, comprehensive API management, and mobile-optimized design. Built for luxury vehicle dealers handling high-value trades ($75K-$200K+).
 
-## Features
+## 🚀 **NEW**: Ready for Railway Deployment!
 
-### User Portal
-- ✅ Shareable submission links for viral growth
+**See `DEPLOYMENT_READY.md` for instant deployment to Railway!**
+
+```bash
+./deploy-railway.sh  # One command to go live!
+```
+
+## ✨ Key Features
+
+### Customer Portal
+- ✅ **License Plate to VIN Lookup** (NEW!) - Enter plate OR VIN
+- ✅ **Auto.dev API Integration** - 8 premium vehicle APIs
 - ✅ Automatic VIN decoding with NHTSA database
-- ✅ Multi-image upload (7 required photos)
-- ✅ Optional video upload for better quotes
+- ✅ Multi-image upload (7 required photos + optional video)
+- ✅ Mobile-optimized design (tested on 8 devices)
 - ✅ Instant ticket number generation
-- ✅ Email confirmation with tracking
+- ✅ Shareable submission links (WhatsApp/SMS)
 
-### Admin Dashboard (To Be Built)
-- View all submissions with filtering
-- VIN-decoded vehicle specifications
-- Media gallery viewer
-- Forward submissions to dealers
-- Track quote statuses
+### Admin Dashboard
+- ✅ **API Management Panel** (NEW!) - Monitor all 8 Auto.dev APIs
+- ✅ **Pricing Analytics** - KBB-style market valuations
+- ✅ View all submissions with real-time updates
+- ✅ VIN-decoded vehicle specifications
+- ✅ Media gallery with lightbox preview
+- ✅ Download all media as ZIP
+- ✅ Forward submissions to dealers
+- ✅ Generate shareable links
 
-### Dealer Portal (To Be Built)
-- Receive forwarded submissions
-- View vehicle data and media
-- Submit competitive quotes
-- Track quote history
+### Pricing Intelligence
+- ✅ Auto.dev Market Valuation API
+- ✅ Low/Average/High price estimates
+- ✅ Dealer insights and recommendations
+- ✅ Confidence ratings
+- ✅ Pricing analytics dashboard
 
 ## Tech Stack
 
@@ -355,48 +368,76 @@ npm run prisma:migrate
 npx prisma migrate reset
 ```
 
-## Deployment
+## 🚀 Deployment to Railway
 
-### Backend Deployment
-
-**Recommended platforms:**
-- **Railway.app** - Easy PostgreSQL + Node.js hosting
-- **Fly.io** - Low-latency global deployment
-- **Render** - Free tier available
-- **Heroku** - Classic PaaS
-
-**Environment variables to set:**
-- `DATABASE_URL`
-- `PORT`
-- `NODE_ENV=production`
-- `SMTP_*` settings
-- `FRONTEND_URL`
-- `JWT_SECRET`
-
-### Frontend Deployment
-
-**Recommended platforms:**
-- **Vercel** - Optimized for Vite/React
-- **Netlify** - Easy CDN deployment
-- **Cloudflare Pages** - Fast global CDN
-
-**Environment variables:**
-- `VITE_API_URL` - Your backend API URL
-
-### Build Commands
+### Quick Deploy (Automated)
 
 ```bash
-# Frontend
-cd frontend
-npm run build
-# Output: dist/
-
-# Backend
-cd backend
-npm run build
-# Output: dist/
-npm start
+cd /Users/brandonin/drl
+./deploy-railway.sh
 ```
+
+Choose option 3 (Deploy Both) and follow prompts!
+
+### Manual Deployment
+
+See comprehensive guides:
+- **`DEPLOYMENT_READY.md`** - Complete deployment status & checklist
+- **`RAILWAY_DEPLOYMENT.md`** - Detailed step-by-step guide
+- **`DEPLOY_NOW.md`** - Quick start commands
+
+### What You Get
+
+- ✅ **Backend**: Auto-deployed with PostgreSQL
+- ✅ **Frontend**: Auto-deployed with CDN
+- ✅ **HTTPS**: Automatic SSL certificates
+- ✅ **Auto-scaling**: Handles traffic spikes
+- ✅ **Database backups**: Automatic daily backups
+- ✅ **Custom domains**: Easy to configure
+
+### Cost
+
+- **First month**: FREE ($5 credit)
+- **After**: ~$5-10/month (Hobby plan)
+- **Scales**: ~$20-50/month as you grow
+
+### Environment Variables
+
+**Backend** (Railway auto-sets DATABASE_URL):
+```env
+PORT=3000
+NODE_ENV=production
+AUTO_DEV_API_KEY=sk_ad_i8ttO7rJHcoeeRHVUMHver41
+FRONTEND_URL=https://your-frontend.railway.app
+JWT_SECRET=(generate secure key)
+```
+
+**Frontend**:
+```env
+VITE_API_URL=https://your-backend.railway.app/api
+```
+
+### Post-Deployment
+
+After deploying, run migrations:
+```bash
+cd backend
+railway run npx prisma migrate deploy
+```
+
+### Alternative Platforms
+
+**Backend**:
+- Railway.app (Recommended - configured!)
+- Fly.io
+- Render
+- Heroku
+
+**Frontend**:
+- Railway.app (Recommended - configured!)
+- Vercel
+- Netlify
+- Cloudflare Pages
 
 ## Security Considerations
 

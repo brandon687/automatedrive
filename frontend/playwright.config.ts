@@ -25,8 +25,13 @@ export default defineConfig({
 
   // Shared settings for all projects
   use: {
-    // Base URL for tests
-    baseURL: 'http://localhost:5173',
+    // Base URL for tests - can be overridden with TEST_URL environment variable
+    // Examples:
+    //   - Local dev: http://localhost:5173 (default)
+    //   - Local prod: http://localhost:3001
+    //   - Railway: https://your-app.railway.app
+    //   - Vercel: https://your-app.vercel.app
+    baseURL: process.env.TEST_URL || 'http://localhost:5173',
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
@@ -36,6 +41,10 @@ export default defineConfig({
 
     // Video on failure
     video: 'retain-on-failure',
+
+    // Add extra timeout for slower deployment environments
+    actionTimeout: 15000,
+    navigationTimeout: 30000,
   },
 
   // Configure projects for major browsers and mobile devices
@@ -87,7 +96,8 @@ export default defineConfig({
   ],
 
   // Run local dev server before starting tests
-  webServer: {
+  // Disabled if TEST_URL is provided (for testing deployed apps)
+  webServer: process.env.TEST_URL ? undefined : {
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,

@@ -13,9 +13,11 @@
     "preview": "vite preview",
     "start": "node simple-server.js",
     "test": "playwright test",
+    "test:smoke": "playwright test e2e/deployment-smoke.spec.ts --project=chromium",
     "test:mobile": "playwright test --project='Mobile Chrome' --project='Mobile Safari'",
     "test:ui": "playwright test --ui",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:deployment": "./scripts/test-deployment.sh"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.6",

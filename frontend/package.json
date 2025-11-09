@@ -11,6 +11,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "start": "node server.js",
     "test": "playwright test",
     "test:mobile": "playwright test --project='Mobile Chrome' --project='Mobile Safari'",
     "test:ui": "playwright test --ui",
@@ -19,6 +20,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.6",
     "axios": "^1.13.2",
+    "express": "^4.21.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-dropzone": "^14.3.8",

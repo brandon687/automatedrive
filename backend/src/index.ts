@@ -45,6 +45,28 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Welcome route
+app.get('/', (req, res) => {
+  res.json({
+    name: 'DealerTrade API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      admin: '/admin',
+      api: {
+        submissions: '/api/submissions',
+        vin: '/api/vin',
+        admin: '/api/admin',
+        dealer: '/api/dealer',
+        valuation: '/api/valuation',
+        licensePlate: '/api/license-plate'
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Routes
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/vin', vinRoutes);

@@ -1,0 +1,27 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+dist/
+build/
+uploads/
+*.log
+.DS_Store
+coverage/
+.vscode/
+.idea/
+
+# Database
+*.db
+*.db-journal
+dev.db
+backend/dev.db
+backend/prisma/dev.db
+
+# Testing
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Uploads
+backend/uploads/

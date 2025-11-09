@@ -8,4 +8,4 @@ cmds = ["npm ci"]
 cmds = ["npx prisma generate", "npm run build"]
 
 [start]
-cmd = "echo 'Starting application...' && ls -la dist/ && echo 'DATABASE_URL set:' && [ -n \"$DATABASE_URL\" ] && echo 'Yes' || echo 'No' && npx prisma migrate deploy && node dist/index.js"
+cmd = "npx prisma migrate resolve --rolled-back 20251109004150_init || true && npx prisma migrate deploy && node dist/index.js"

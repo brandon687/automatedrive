@@ -1,0 +1,1 @@
+Validate environment variables across local and Railway environments. Check for missing required variables and security issues.

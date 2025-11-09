@@ -1,0 +1,1 @@
+Run comprehensive health checks on deployed services, test API endpoints, verify database connectivity, and monitor performance.

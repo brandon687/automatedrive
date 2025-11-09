@@ -1,0 +1,1 @@
+Debug Railway deployment issues by checking service status, logs, environment variables, and configuration files. Identify and fix deployment blockers.

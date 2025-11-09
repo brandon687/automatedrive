@@ -24,6 +24,35 @@ This directory contains Claude Code configuration, agents, hooks, and automation
 @ui-ux-designer [your design request]
 ```
 
+### Railway Deployment Agents
+**Location:** `.claude/agents/`
+**Purpose:** Specialized agents for debugging and managing Railway deployments
+
+#### 1. Railway Debug Bot
+**File:** `railway-debug-bot.md`
+**Purpose:** Debug Railway deployment issues, analyze logs, check configuration
+**Command:** `/railway-debug`
+
+#### 2. Database Migration Bot
+**File:** `database-migration-bot.md`
+**Purpose:** Manage Prisma migrations, validate schema, test database connectivity
+**Command:** `/db-migrate`
+
+#### 3. Build Validator Bot
+**File:** `build-validator-bot.md`
+**Purpose:** Validate TypeScript builds, check dependencies, verify compilation
+**Command:** `/build-validate`
+
+#### 4. Environment Validator Bot
+**File:** `environment-validator-bot.md`
+**Purpose:** Validate environment variables, check security, compare local vs Railway
+**Command:** `/env-validate`
+
+#### 5. Health Check Bot
+**File:** `health-check-bot.md`
+**Purpose:** Monitor service health, test endpoints, check performance
+**Command:** `/health-check`
+
 ## Automation Hooks
 
 ### Project Initialization Hook

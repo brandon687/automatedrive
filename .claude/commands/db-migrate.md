@@ -1,0 +1,1 @@
+Run database migrations, check migration status, and validate schema consistency. Handle migration conflicts and connection issues.

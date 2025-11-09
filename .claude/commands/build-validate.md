@@ -1,0 +1,1 @@
+Validate TypeScript build, check for type errors, verify dependencies, and test build output. Fix compilation issues.

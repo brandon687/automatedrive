@@ -11,7 +11,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "./start.sh",
+    "start": "node simple-server.js",
     "test": "playwright test",
     "test:mobile": "playwright test --project='Mobile Chrome' --project='Mobile Safari'",
     "test:ui": "playwright test --ui",

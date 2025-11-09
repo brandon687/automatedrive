@@ -22,7 +22,7 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
 
       {/* Steps */}
       <div className="relative flex justify-between">
-        {steps.map((step, index) => {
+        {steps.map((step, _index) => {
           const isActive = currentStep === step.number;
           const isCompleted = currentStep > step.number;
           const isUpcoming = currentStep < step.number;

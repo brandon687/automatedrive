@@ -35,7 +35,7 @@ interface PricingAnalyticsProps {
 
 export default function PricingAnalytics({
   submissionId,
-  vin,
+  vin: _vin,
   year,
   make,
   model,

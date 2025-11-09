@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
-import { decodeVIN, createSubmission, uploadMedia } from '../lib/api';
+import { decodeVIN, createSubmission } from '../lib/api';
 import StepIndicator from './StepIndicator';
 import VehiclePreviewCard from './VehiclePreviewCard';
 import PremiumMediaUpload from './PremiumMediaUpload';
@@ -36,7 +36,7 @@ const steps = [
 export default function LuxurySubmissionForm() {
   const [step, setStep] = useState(1);
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);
-  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [_submissionId, setSubmissionId] = useState<string | null>(null);
   const [ticketNumber, setTicketNumber] = useState<string | null>(null);
   const [isDecodingVIN, setIsDecodingVIN] = useState(false);
   const [vinError, setVinError] = useState<string | null>(null);
@@ -99,16 +99,16 @@ export default function LuxurySubmissionForm() {
   });
 
   // Upload media mutation
-  const mediaMutation = useMutation({
-    mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
-      uploadMedia(id, formData),
-    onSuccess: () => {
-      setStep(5);
-    },
-  });
+  // const mediaMutation = useMutation({
+  //   mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+  //     uploadMedia(id, formData),
+  //   onSuccess: () => {
+  //     setStep(5);
+  //   },
+  // });
 
   // Handle details submission
-  const onSubmitDetails = (data: SubmissionFormData) => {
+  const onSubmitDetails = (_data: SubmissionFormData) => {
     setStep(4);
   };
 
@@ -124,16 +124,16 @@ export default function LuxurySubmissionForm() {
   };
 
   // Handle media upload
-  const handleMediaSubmit = () => {
-    if (!submissionId) return;
+  // const handleMediaSubmit = () => {
+  //   if (!submissionId) return;
 
-    const formData = new FormData();
-    Object.entries(mediaFiles).forEach(([key, file]) => {
-      formData.append(key, file);
-    });
+  //   const formData = new FormData();
+  //   Object.entries(mediaFiles).forEach(([key, file]) => {
+  //     formData.append(key, file);
+  //   });
 
-    mediaMutation.mutate({ id: submissionId, formData });
-  };
+  //   mediaMutation.mutate({ id: submissionId, formData });
+  // };
 
   const requiredPhotos = [
     'front',
@@ -175,7 +175,7 @@ export default function LuxurySubmissionForm() {
     return {
       low: Math.round(estimatedValue * 0.92),
       high: Math.round(estimatedValue * 1.05),
-      confidence: watchedMileage && watchedCondition ? 'high' : 'medium',
+      confidence: (watchedMileage && watchedCondition ? 'high' : 'medium') as 'high' | 'medium' | 'low',
     };
   };
 

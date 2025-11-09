@@ -344,7 +344,6 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
-      </div>
 
       {/* Detail Modal */}
       {selectedSubmission && (

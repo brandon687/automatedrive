@@ -2,6 +2,10 @@
 
 ## 🌐 Live Application URLs
 
+### Frontend Application (USER LINK) 🎯
+- **Live App**: https://chic-hope-production.up.railway.app
+- **Users access your app here!**
+
 ### Backend API
 - **Production URL**: https://automatedrive-production.up.railway.app
 - **Health Check**: https://automatedrive-production.up.railway.app/health

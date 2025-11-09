@@ -8,4 +8,4 @@ cmds = ["cd backend && npm ci"]
 cmds = ["cd backend && npx prisma generate && npm run build"]
 
 [start]
-cmd = "cd backend && npx prisma migrate resolve --rolled-back 20251109004150_init || true && npx prisma migrate resolve --applied 20251109004150_init || true && npx prisma migrate deploy && node dist/index.js"
+cmd = "cd backend && npx prisma migrate resolve --rolled-back 20251109004150_init || true && npx prisma migrate resolve --applied 20251109004150_init || true && npx prisma migrate resolve --rolled-back 20251109104506_fresh_init || true && npx prisma migrate resolve --applied 20251109104506_fresh_init || true && npx prisma migrate deploy || true && node dist/index.js"

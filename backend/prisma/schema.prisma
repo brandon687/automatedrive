@@ -59,9 +59,14 @@ model Submission {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  media     Media[]
-  quotes    Quote[]
-  referrals Referral[]
+  media                Media[]
+  quotes               Quote[]
+  referrals            Referral[]
+  marketPriceSources   MarketPriceSource[]
+  marketAnalysis       MarketAnalysis?
+  priceHistory         PriceHistory[]
+  comparableVehicles   ComparableVehicle[]
+  marketResearchJobs   MarketResearchJob[]
 
   @@map("submissions")
 }
@@ -128,4 +133,187 @@ model Referral {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("referrals")
+}
+
+// ========================================
+// MARKET RESEARCH & PRICING MODELS
+// ========================================
+
+// Individual price data from each market source
+model MarketPriceSource {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  // Source Information
+  sourceName   String   @map("source_name") // 'cargurus', 'autotrader', 'kbb', 'nada', 'blackbook', 'edmunds'
+  sourceUrl    String?  @map("source_url")
+
+  // Pricing Data
+  askingPrice        Int?     @map("asking_price")
+  dealerPrice        Int?     @map("dealer_price")
+  privatePartyPrice  Int?     @map("private_party_price")
+  tradeInValue       Int?     @map("trade_in_value")
+
+  // Listing Details
+  listingId       String? @map("listing_id")
+  dealerName      String? @map("dealer_name")
+  dealerLocation  String? @map("dealer_location")
+  mileage         Int?
+  year            Int?
+  condition       String?
+  daysOnMarket    Int?    @map("days_on_market")
+
+  // Vehicle-Specific Adjustments
+  colorExterior String? @map("color_exterior")
+  colorInterior String? @map("color_interior")
+  transmission  String?
+  drivetrain    String?
+  fuelType      String? @map("fuel_type")
+
+  // Confidence & Metadata
+  confidenceScore  Decimal? @map("confidence_score") @db.Decimal(3, 2)
+  dataFreshness    DateTime @default(now()) @map("data_freshness")
+  scrapeTimestamp  DateTime @default(now()) @map("scrape_timestamp")
+
+  // Raw Data Storage
+  rawData Json? @map("raw_data")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([submissionId])
+  @@index([sourceName])
+  @@index([dataFreshness])
+  @@map("market_price_sources")
+}
+
+// Aggregated market analysis
+model MarketAnalysis {
+  id           String   @id @default(uuid())
+  submissionId String   @unique @map("submission_id")
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  // Aggregated Pricing (from multiple sources)
+  marketLow                 Int    @map("market_low")
+  marketAverage             Int    @map("market_average")
+  marketHigh                Int    @map("market_high")
+  recommendedAskingPrice    Int?   @map("recommended_asking_price")
+  recommendedDealerOffer    Int?   @map("recommended_dealer_offer")
+
+  // Market Intelligence
+  totalComparableListings Int     @default(0) @map("total_comparable_listings")
+  averageDaysToSell       Int?    @map("average_days_to_sell")
+  marketDemand            String? @map("market_demand") // 'very_high', 'high', 'moderate', 'low', 'very_low'
+  priceTrend              String? @map("price_trend") // 'increasing', 'stable', 'decreasing'
+
+  // Geographic Analysis
+  localMarketListings     Int?     @map("local_market_listings")
+  nationalMarketListings  Int?     @map("national_market_listings")
+  regionalPriceVariance   Decimal? @map("regional_price_variance") @db.Decimal(5, 2)
+
+  // Confidence Metrics
+  dataSourcesCount  Int      @default(0) @map("data_sources_count")
+  overallConfidence String?  @map("overall_confidence") // 'excellent', 'good', 'fair', 'poor'
+  lastUpdated       DateTime @default(now()) @map("last_updated")
+
+  // Analysis Notes
+  marketInsights         String? @map("market_insights") @db.Text
+  pricingRecommendation  String? @map("pricing_recommendation") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([submissionId])
+  @@index([lastUpdated])
+  @@map("market_analysis")
+}
+
+// Historical price tracking
+model PriceHistory {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  // Price Point
+  marketAverage Int @map("market_average")
+  sourceCount   Int @map("source_count")
+
+  // Snapshot timestamp
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  // Change from previous
+  changeAmount     Int?     @map("change_amount")
+  changePercentage Decimal? @map("change_percentage") @db.Decimal(5, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([submissionId])
+  @@index([recordedAt])
+  @@map("price_history")
+}
+
+// Comparable vehicles for context
+model ComparableVehicle {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  // Vehicle Identity
+  vin   String?
+  year  Int
+  make  String
+  model String
+  trim  String?
+
+  // Listing Details
+  askingPrice Int    @map("asking_price")
+  mileage     Int
+  condition   String?
+  location    String?
+
+  // Source
+  sourceName  String  @map("source_name")
+  sourceUrl   String? @map("source_url") @db.Text
+  listingDate DateTime? @map("listing_date") @db.Date
+
+  // Similarity Score
+  similarityScore Decimal @map("similarity_score") @db.Decimal(3, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([submissionId])
+  @@index([similarityScore])
+  @@map("comparable_vehicles")
+}
+
+// Market research jobs queue
+model MarketResearchJob {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  // Job Configuration
+  jobType  String @map("job_type") // 'full_research', 'quick_check', 'price_update'
+  priority Int    @default(5) // 1-10, higher = more urgent
+
+  // Status
+  status      String    @default("pending") // 'pending', 'processing', 'completed', 'failed'
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  // Results
+  sourcesChecked    String[] @map("sources_checked")
+  sourcesSuccessful String[] @map("sources_successful")
+  errorMessage      String?  @map("error_message") @db.Text
+
+  // Retry Logic
+  retryCount Int @default(0) @map("retry_count")
+  maxRetries Int @default(3) @map("max_retries")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([priority])
+  @@map("market_research_jobs")
 }

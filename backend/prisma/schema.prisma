@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -172,7 +172,7 @@ model MarketPriceSource {
   fuelType      String? @map("fuel_type")
 
   // Confidence & Metadata
-  confidenceScore  Decimal? @map("confidence_score") @db.Decimal(3, 2)
+  confidenceScore  Float? @map("confidence_score")
   dataFreshness    DateTime @default(now()) @map("data_freshness")
   scrapeTimestamp  DateTime @default(now()) @map("scrape_timestamp")
 
@@ -209,7 +209,7 @@ model MarketAnalysis {
   // Geographic Analysis
   localMarketListings     Int?     @map("local_market_listings")
   nationalMarketListings  Int?     @map("national_market_listings")
-  regionalPriceVariance   Decimal? @map("regional_price_variance") @db.Decimal(5, 2)
+  regionalPriceVariance   Float? @map("regional_price_variance")
 
   // Confidence Metrics
   dataSourcesCount  Int      @default(0) @map("data_sources_count")
@@ -217,8 +217,8 @@ model MarketAnalysis {
   lastUpdated       DateTime @default(now()) @map("last_updated")
 
   // Analysis Notes
-  marketInsights         String? @map("market_insights") @db.Text
-  pricingRecommendation  String? @map("pricing_recommendation") @db.Text
+  marketInsights         String? @map("market_insights")
+  pricingRecommendation  String? @map("pricing_recommendation")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -243,7 +243,7 @@ model PriceHistory {
 
   // Change from previous
   changeAmount     Int?     @map("change_amount")
-  changePercentage Decimal? @map("change_percentage") @db.Decimal(5, 2)
+  changePercentage Float? @map("change_percentage")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -273,11 +273,11 @@ model ComparableVehicle {
 
   // Source
   sourceName  String  @map("source_name")
-  sourceUrl   String? @map("source_url") @db.Text
-  listingDate DateTime? @map("listing_date") @db.Date
+  sourceUrl   String? @map("source_url")
+  listingDate DateTime? @map("listing_date")
 
   // Similarity Score
-  similarityScore Decimal @map("similarity_score") @db.Decimal(3, 2)
+  similarityScore Float @map("similarity_score")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -302,9 +302,9 @@ model MarketResearchJob {
   completedAt DateTime? @map("completed_at")
 
   // Results
-  sourcesChecked    String[] @map("sources_checked")
-  sourcesSuccessful String[] @map("sources_successful")
-  errorMessage      String?  @map("error_message") @db.Text
+  sourcesChecked    String @map("sources_checked") // JSON string array
+  sourcesSuccessful String @map("sources_successful") // JSON string array
+  errorMessage      String?  @map("error_message")
 
   // Retry Logic
   retryCount Int @default(0) @map("retry_count")

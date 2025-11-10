@@ -59,7 +59,9 @@ export default function PublicSubmissionView() {
     // Backend serves static files from /uploads
     // filePath is already like "uploads/front-xxx.jpg"
     const cleanPath = filePath.replace(/^\/+/, '');
-    return `http://localhost:3000/${cleanPath}`;
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE.replace('/api', '');
+    return `${baseUrl}/${cleanPath}`;
   };
 
   const openLightbox = (media: Media) => {

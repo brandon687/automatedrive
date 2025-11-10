@@ -61,7 +61,9 @@ export default function AdminDashboard() {
 
   const getMediaUrl = (filePath: string) => {
     const cleanPath = filePath.replace(/^\/+/, '');
-    return `http://localhost:3000/${cleanPath}`;
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE.replace('/api', '');
+    return `${baseUrl}/${cleanPath}`;
   };
 
   const openLightbox = (media: {id: string; type: string; filePath: string;}) => {
@@ -424,15 +426,15 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     Submitter Information
                   </h3>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm">
-                      <strong>Name:</strong> {selectedSubmission.submitter.name || 'N/A'}
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                    <p className="text-sm text-gray-900">
+                      <span className="font-bold text-gray-900">Name:</span> {selectedSubmission.submitter.name || 'N/A'}
                     </p>
-                    <p className="text-sm">
-                      <strong>Email:</strong> {selectedSubmission.submitter.email || 'N/A'}
+                    <p className="text-sm text-gray-900">
+                      <span className="font-bold text-gray-900">Email:</span> {selectedSubmission.submitter.email || 'N/A'}
                     </p>
-                    <p className="text-sm">
-                      <strong>Phone:</strong> {selectedSubmission.submitter.phone || 'N/A'}
+                    <p className="text-sm text-gray-900">
+                      <span className="font-bold text-gray-900">Phone:</span> {selectedSubmission.submitter.phone || 'N/A'}
                     </p>
                   </div>
                 </div>

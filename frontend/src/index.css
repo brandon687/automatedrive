@@ -102,6 +102,35 @@
     @apply border-luxury-charcoal-light/60;
   }
 
+  /* Standard Form Inputs - High Contrast for Accessibility */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="url"],
+  select,
+  textarea {
+    @apply text-gray-900;
+    font-weight: 500;
+  }
+
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="tel"]::placeholder,
+  input[type="number"]::placeholder,
+  input[type="password"]::placeholder,
+  input[type="url"]::placeholder,
+  textarea::placeholder {
+    @apply text-gray-400;
+    font-weight: 400;
+  }
+
+  /* Ensure select dropdowns have proper contrast */
+  select option {
+    @apply text-gray-900 bg-white;
+  }
+
   /* Label Styles */
   .luxury-label {
     @apply block text-sm font-medium text-luxury-platinum mb-2;

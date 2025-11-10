@@ -86,7 +86,7 @@
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* Input Styles */
+  /* Input Styles - OVERRIDE ALL TEXT COLORS */
   .luxury-input {
     @apply w-full px-4 py-3;
     @apply bg-white;
@@ -95,9 +95,9 @@
     @apply transition-all duration-300;
     @apply focus:outline-none focus:border-luxury-gold focus:bg-white;
     @apply focus:ring-2 focus:ring-luxury-gold/20;
-    /* Force black text color */
-    color: #111827 !important;
-    font-weight: 500 !important;
+    /* Force black text color - v2 */
+    color: #000000 !important;
+    font-weight: 600 !important;
   }
 
   .luxury-input::placeholder {
@@ -105,12 +105,12 @@
     font-weight: 400 !important;
   }
 
-  /* Force text color for all input types */
+  /* Force text color for all input types - v2 */
   input.luxury-input,
   select.luxury-input,
   textarea.luxury-input {
-    color: #111827 !important;
-    font-weight: 500 !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
   }
 
   select.luxury-input option {

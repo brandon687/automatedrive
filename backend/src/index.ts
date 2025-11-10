@@ -9,6 +9,7 @@ import adminRoutes from './routes/admin.routes';
 import dealerRoutes from './routes/dealer.routes';
 import valuationRoutes from './routes/valuation.routes';
 import licensePlateRoutes from './routes/licensePlate.routes';
+import marketResearchRoutes from './routes/marketResearch.routes';
 
 dotenv.config();
 
@@ -80,7 +81,8 @@ app.get('/', (req, res) => {
         admin: '/api/admin',
         dealer: '/api/dealer',
         valuation: '/api/valuation',
-        licensePlate: '/api/license-plate'
+        licensePlate: '/api/license-plate',
+        marketResearch: '/api/market-research'
       }
     },
     timestamp: new Date().toISOString()
@@ -94,6 +96,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/dealer', dealerRoutes);
 app.use('/api/valuation', valuationRoutes);
 app.use('/api/license-plate', licensePlateRoutes);
+app.use('/api/market-research', marketResearchRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

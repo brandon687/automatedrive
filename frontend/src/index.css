@@ -92,11 +92,30 @@
     @apply bg-white;
     @apply border-2 border-gray-300;
     @apply rounded-xl;
-    @apply text-gray-900 placeholder:text-gray-400;
-    @apply font-medium;
     @apply transition-all duration-300;
     @apply focus:outline-none focus:border-luxury-gold focus:bg-white;
     @apply focus:ring-2 focus:ring-luxury-gold/20;
+    /* Force black text color */
+    color: #111827 !important;
+    font-weight: 500 !important;
+  }
+
+  .luxury-input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+  }
+
+  /* Force text color for all input types */
+  input.luxury-input,
+  select.luxury-input,
+  textarea.luxury-input {
+    color: #111827 !important;
+    font-weight: 500 !important;
+  }
+
+  select.luxury-input option {
+    color: #111827 !important;
+    background-color: #ffffff !important;
   }
 
   .luxury-input:hover {

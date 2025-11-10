@@ -228,11 +228,11 @@ export async function getSubmissionPricing(req: Request, res: Response) {
       include: {
         marketAnalysis: true,
         marketPriceSources: {
-          orderBy: { scrapedAt: 'desc' },
+          orderBy: { scrapeTimestamp: 'desc' },
         },
         comparableVehicles: true,
         priceHistory: {
-          orderBy: { timestamp: 'desc' },
+          orderBy: { recordedAt: 'desc' },
           take: 30, // Last 30 price updates
         },
         marketResearchJobs: {
@@ -249,7 +249,7 @@ export async function getSubmissionPricing(req: Request, res: Response) {
     // Calculate state-by-state breakdown
     const stateBreakdown: any = {};
     submission.comparableVehicles.forEach(comp => {
-      const stateMatch = comp.location.match(/,\s*([A-Z]{2})$/);
+      const stateMatch = comp.location?.match(/,\s*([A-Z]{2})$/);
       const state = stateMatch ? stateMatch[1] : 'Unknown';
 
       if (!stateBreakdown[state]) {
@@ -262,11 +262,11 @@ export async function getSubmissionPricing(req: Request, res: Response) {
         };
       }
 
-      if (comp.price) {
+      if (comp.askingPrice) {
         stateBreakdown[state].count++;
-        stateBreakdown[state].prices.push(comp.price);
-        stateBreakdown[state].minPrice = Math.min(stateBreakdown[state].minPrice, comp.price);
-        stateBreakdown[state].maxPrice = Math.max(stateBreakdown[state].maxPrice, comp.price);
+        stateBreakdown[state].prices.push(comp.askingPrice);
+        stateBreakdown[state].minPrice = Math.min(stateBreakdown[state].minPrice, comp.askingPrice);
+        stateBreakdown[state].maxPrice = Math.max(stateBreakdown[state].maxPrice, comp.askingPrice);
       }
     });
 
@@ -456,7 +456,6 @@ export async function getDashboardStats(req: Request, res: Response) {
     // Get average pricing confidence
     const pricingStats = await prisma.marketAnalysis.aggregate({
       _avg: {
-        overallConfidence: true,
         marketAverage: true,
       },
       _count: {
@@ -508,9 +507,8 @@ export async function getDashboardStats(req: Request, res: Response) {
         pendingResearchJobs,
       },
       pricing: {
-        averageConfidence: pricingStats._avg.overallConfidence || 0,
-        averageMarketValue: pricingStats._avg.marketAverage || 0,
-        totalAnalyses: pricingStats._count.id,
+        averageMarketValue: pricingStats._avg?.marketAverage || 0,
+        totalAnalyses: pricingStats._count?.id || 0,
       },
       research: {
         totalJobs,

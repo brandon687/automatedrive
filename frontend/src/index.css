@@ -89,17 +89,18 @@
   /* Input Styles */
   .luxury-input {
     @apply w-full px-4 py-3;
-    @apply bg-luxury-charcoal-light/50;
-    @apply border-2 border-luxury-charcoal-light;
+    @apply bg-white;
+    @apply border-2 border-gray-300;
     @apply rounded-xl;
-    @apply text-luxury-platinum placeholder:text-luxury-silver/50;
+    @apply text-gray-900 placeholder:text-gray-400;
+    @apply font-medium;
     @apply transition-all duration-300;
-    @apply focus:outline-none focus:border-luxury-gold focus:bg-luxury-charcoal-light/70;
+    @apply focus:outline-none focus:border-luxury-gold focus:bg-white;
     @apply focus:ring-2 focus:ring-luxury-gold/20;
   }
 
   .luxury-input:hover {
-    @apply border-luxury-charcoal-light/60;
+    @apply border-gray-400;
   }
 
   /* Standard Form Inputs - High Contrast for Accessibility */

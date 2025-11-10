@@ -86,7 +86,7 @@
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* Input Styles - OVERRIDE ALL TEXT COLORS */
+  /* Input Styles - BOLD BLACK TEXT */
   .luxury-input {
     @apply w-full px-4 py-3;
     @apply bg-white;
@@ -95,9 +95,10 @@
     @apply transition-all duration-300;
     @apply focus:outline-none focus:border-luxury-gold focus:bg-white;
     @apply focus:ring-2 focus:ring-luxury-gold/20;
-    /* Force black text color - v2 */
+    /* Force BOLD BLACK text - v3 */
     color: #000000 !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
   }
 
   .luxury-input::placeholder {
@@ -105,16 +106,27 @@
     font-weight: 400 !important;
   }
 
-  /* Force text color for all input types - v2 */
+  /* Force BOLD BLACK text for all luxury input types - v3 */
   input.luxury-input,
   select.luxury-input,
   textarea.luxury-input {
     color: #000000 !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
   }
 
+  /* When focused, keep BOLD BLACK text */
+  input.luxury-input:focus,
+  select.luxury-input:focus,
+  textarea.luxury-input:focus {
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+
+  /* Dropdown options BOLD BLACK */
   select.luxury-input option {
-    color: #111827 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
     background-color: #ffffff !important;
   }
 
@@ -122,7 +134,7 @@
     @apply border-gray-400;
   }
 
-  /* Standard Form Inputs - High Contrast for Accessibility */
+  /* Standard Form Inputs - BOLD BLACK for maximum visibility */
   input[type="text"],
   input[type="email"],
   input[type="tel"],
@@ -131,10 +143,12 @@
   input[type="url"],
   select,
   textarea {
-    @apply text-gray-900;
-    font-weight: 500;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
   }
 
+  /* Keep placeholders lighter */
   input[type="text"]::placeholder,
   input[type="email"]::placeholder,
   input[type="tel"]::placeholder,
@@ -146,9 +160,11 @@
     font-weight: 400;
   }
 
-  /* Ensure select dropdowns have proper contrast */
+  /* Ensure select dropdowns BOLD BLACK */
   select option {
-    @apply text-gray-900 bg-white;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    background-color: #ffffff !important;
   }
 
   /* Label Styles */

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../lib/api';
 import APIManagement from './APIManagement';
 import PricingAnalytics from './PricingAnalytics';
+import MarketResearchDisplay from './MarketResearchDisplay';
 
 interface Submission {
   id: string;
@@ -419,6 +420,12 @@ export default function AdminDashboard() {
                   model={selectedSubmission.model}
                   mileage={selectedSubmission.mileage}
                 />
+              </div>
+
+              {/* Market Research Intelligence */}
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Live Market Research</h3>
+                <MarketResearchDisplay submissionId={selectedSubmission.id} />
               </div>
 
               {selectedSubmission.submitter && (

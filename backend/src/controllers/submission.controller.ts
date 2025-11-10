@@ -3,6 +3,7 @@ import prisma from '../utils/prisma';
 import { generateTicketNumber } from '../utils/ticketGenerator';
 import { decodeVIN, isValidVIN } from '../services/vin.service';
 import { sendSubmissionConfirmation, sendAdminNotification } from '../services/email.service';
+import { marketResearch } from '../services/market-research.service';
 
 /**
  * Create a new vehicle submission
@@ -74,6 +75,12 @@ export async function createSubmission(req: Request, res: Response) {
     // Notify admin
     const vehicleInfo = `${vehicleData.year} ${vehicleData.make} ${vehicleData.model}`;
     await sendAdminNotification(ticketNumber, vehicleInfo);
+
+    // Trigger automatic market research in background (nationwide search)
+    triggerMarketResearch(submission.id, vehicleData, parseInt(mileage)).catch(error => {
+      console.error('[Auto Market Research] Failed to trigger:', error);
+      // Don't block submission response if research fails
+    });
 
     res.status(201).json({
       success: true,
@@ -213,5 +220,98 @@ export async function downloadMedia(req: Request, res: Response) {
     if (!res.headersSent) {
       res.status(500).json({ error: 'Failed to download media' });
     }
+  }
+}
+
+/**
+ * Trigger automatic market research for a submission (background process)
+ */
+async function triggerMarketResearch(submissionId: string, vehicleData: any, mileage: number) {
+  try {
+    console.log(`[Auto Market Research] Starting for submission ${submissionId}`);
+
+    // Create research job in queue
+    await prisma.marketResearchJob.create({
+      data: {
+        submissionId,
+        jobType: 'full_research',
+        priority: 5,
+        status: 'pending',
+        sourcesChecked: '[]',
+        sourcesSuccessful: '[]',
+      }
+    });
+
+    // Perform research (this will run in background)
+    setImmediate(async () => {
+      try {
+        // Update job to processing
+        await prisma.marketResearchJob.updateMany({
+          where: { submissionId, status: 'pending' },
+          data: {
+            status: 'processing',
+            startedAt: new Date()
+          }
+        });
+
+        // Perform nationwide research with state breakdowns
+        const results = await marketResearch.performResearch({
+          vin: vehicleData.vin,
+          year: vehicleData.year,
+          make: vehicleData.make,
+          model: vehicleData.model,
+          trim: vehicleData.trim,
+          mileage: mileage,
+        });
+
+        // Store results
+        await marketResearch.storeResearchResults(submissionId, results);
+
+        // Update submission with pricing
+        await prisma.submission.update({
+          where: { id: submissionId },
+          data: {
+            estimatedValueLow: results.marketLow,
+            estimatedValueAvg: results.marketAverage,
+            estimatedValueHigh: results.marketHigh,
+            valuationSource: 'market_research_auto',
+            valuationConfidence: results.overallConfidence,
+            valuationDate: new Date(),
+          }
+        });
+
+        // Mark job as completed
+        await prisma.marketResearchJob.updateMany({
+          where: { submissionId, status: 'processing' },
+          data: {
+            status: 'completed',
+            completedAt: new Date(),
+            sourcesChecked: JSON.stringify(['cargurus', 'autotrader']),
+            sourcesSuccessful: JSON.stringify(['cargurus', 'autotrader']),
+          }
+        });
+
+        console.log(`[Auto Market Research] Completed for submission ${submissionId}`);
+        console.log(`  Market Average: $${results.marketAverage.toLocaleString()}`);
+        console.log(`  Confidence: ${results.overallConfidence}`);
+        console.log(`  Sources: ${results.dataSourcesCount}`);
+      } catch (error: any) {
+        console.error(`[Auto Market Research] Error for ${submissionId}:`, error);
+
+        // Mark job as failed
+        await prisma.marketResearchJob.updateMany({
+          where: { submissionId, status: 'processing' },
+          data: {
+            status: 'failed',
+            completedAt: new Date(),
+            errorMessage: error.message
+          }
+        });
+      }
+    });
+
+  } catch (error: any) {
+    console.error('[Auto Market Research] Failed to queue:', error);
+    throw error;
   }
 }

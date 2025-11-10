@@ -49,6 +49,26 @@ export async function getAllSubmissions(req: Request, res: Response) {
               dealer: true,
             },
           },
+          marketAnalysis: {
+            select: {
+              marketLow: true,
+              marketAverage: true,
+              marketHigh: true,
+              recommendedDealerOffer: true,
+              overallConfidence: true,
+              marketDemand: true,
+              averageDaysToSell: true,
+              lastUpdated: true,
+            }
+          },
+          marketResearchJobs: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: {
+              status: true,
+              completedAt: true,
+            }
+          },
         },
         orderBy: {
           createdAt: 'desc',
@@ -193,6 +213,324 @@ export async function generateShareableLink(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Generate shareable link error:', error);
     res.status(500).json({ error: 'Failed to generate shareable link' });
+  }
+}
+
+/**
+ * Get detailed pricing data for a submission with state-by-state breakdown
+ */
+export async function getSubmissionPricing(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const submission = await prisma.submission.findUnique({
+      where: { id },
+      include: {
+        marketAnalysis: true,
+        marketPriceSources: {
+          orderBy: { scrapedAt: 'desc' },
+        },
+        comparableVehicles: true,
+        priceHistory: {
+          orderBy: { timestamp: 'desc' },
+          take: 30, // Last 30 price updates
+        },
+        marketResearchJobs: {
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+        },
+      },
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    // Calculate state-by-state breakdown
+    const stateBreakdown: any = {};
+    submission.comparableVehicles.forEach(comp => {
+      const stateMatch = comp.location.match(/,\s*([A-Z]{2})$/);
+      const state = stateMatch ? stateMatch[1] : 'Unknown';
+
+      if (!stateBreakdown[state]) {
+        stateBreakdown[state] = {
+          count: 0,
+          prices: [],
+          avgPrice: 0,
+          minPrice: Infinity,
+          maxPrice: 0,
+        };
+      }
+
+      if (comp.price) {
+        stateBreakdown[state].count++;
+        stateBreakdown[state].prices.push(comp.price);
+        stateBreakdown[state].minPrice = Math.min(stateBreakdown[state].minPrice, comp.price);
+        stateBreakdown[state].maxPrice = Math.max(stateBreakdown[state].maxPrice, comp.price);
+      }
+    });
+
+    // Calculate averages for each state
+    Object.keys(stateBreakdown).forEach(state => {
+      const data = stateBreakdown[state];
+      if (data.prices.length > 0) {
+        data.avgPrice = Math.round(data.prices.reduce((a: number, b: number) => a + b, 0) / data.prices.length);
+      }
+      delete data.prices; // Remove raw prices array from response
+    });
+
+    // Sort states by listing count
+    const sortedStates = Object.entries(stateBreakdown)
+      .sort((a: any, b: any) => b[1].count - a[1].count)
+      .reduce((obj: any, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      }, {});
+
+    res.json({
+      submissionId: submission.id,
+      vehicle: {
+        year: submission.year,
+        make: submission.make,
+        model: submission.model,
+        trim: submission.trim,
+        vin: submission.vin,
+        mileage: submission.mileage,
+      },
+      marketAnalysis: submission.marketAnalysis,
+      stateBreakdown: sortedStates,
+      totalComparables: submission.comparableVehicles.length,
+      dataSources: submission.marketPriceSources.length,
+      priceHistory: submission.priceHistory,
+      researchJobs: submission.marketResearchJobs,
+      lastUpdated: submission.marketAnalysis?.lastUpdated || submission.updatedAt,
+    });
+  } catch (error: any) {
+    console.error('Get submission pricing error:', error);
+    res.status(500).json({ error: 'Failed to retrieve pricing data' });
+  }
+}
+
+/**
+ * Manually trigger pricing research refresh for a submission
+ */
+export async function refreshSubmissionPricing(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const submission = await prisma.submission.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        vin: true,
+        year: true,
+        make: true,
+        model: true,
+        trim: true,
+        mileage: true,
+      },
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    // Create new research job
+    const job = await prisma.marketResearchJob.create({
+      data: {
+        submissionId: submission.id,
+        jobType: 'manual_refresh',
+        priority: 10, // High priority for manual refreshes
+        status: 'pending',
+        sourcesChecked: '[]',
+        sourcesSuccessful: '[]',
+      },
+    });
+
+    // Trigger research in background
+    const { marketResearch } = require('../services/market-research.service');
+
+    setImmediate(async () => {
+      try {
+        await prisma.marketResearchJob.update({
+          where: { id: job.id },
+          data: {
+            status: 'processing',
+            startedAt: new Date(),
+          },
+        });
+
+        const results = await marketResearch.performResearch({
+          vin: submission.vin,
+          year: submission.year,
+          make: submission.make,
+          model: submission.model,
+          trim: submission.trim,
+          mileage: submission.mileage,
+        });
+
+        await marketResearch.storeResearchResults(submission.id, results);
+
+        await prisma.submission.update({
+          where: { id: submission.id },
+          data: {
+            estimatedValueLow: results.marketLow,
+            estimatedValueAvg: results.marketAverage,
+            estimatedValueHigh: results.marketHigh,
+            valuationSource: 'market_research_manual',
+            valuationConfidence: results.overallConfidence,
+            valuationDate: new Date(),
+          },
+        });
+
+        await prisma.marketResearchJob.update({
+          where: { id: job.id },
+          data: {
+            status: 'completed',
+            completedAt: new Date(),
+            sourcesChecked: JSON.stringify(['cargurus', 'autotrader']),
+            sourcesSuccessful: JSON.stringify(['cargurus', 'autotrader']),
+          },
+        });
+
+        console.log(`[Manual Refresh] Completed for submission ${submission.id}`);
+      } catch (error: any) {
+        console.error(`[Manual Refresh] Error for ${submission.id}:`, error);
+        await prisma.marketResearchJob.update({
+          where: { id: job.id },
+          data: {
+            status: 'failed',
+            completedAt: new Date(),
+            errorMessage: error.message,
+          },
+        });
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Pricing refresh triggered',
+      jobId: job.id,
+      vehicle: `${submission.year} ${submission.make} ${submission.model}`,
+    });
+  } catch (error: any) {
+    console.error('Refresh pricing error:', error);
+    res.status(500).json({ error: 'Failed to trigger pricing refresh' });
+  }
+}
+
+/**
+ * Get dashboard statistics with pricing insights
+ */
+export async function getDashboardStats(req: Request, res: Response) {
+  try {
+    // Get overall counts
+    const [
+      totalSubmissions,
+      submissionsWithPricing,
+      pendingResearchJobs,
+      completedToday,
+    ] = await Promise.all([
+      prisma.submission.count(),
+      prisma.submission.count({
+        where: {
+          marketAnalysis: {
+            isNot: null,
+          },
+        },
+      }),
+      prisma.marketResearchJob.count({
+        where: {
+          status: { in: ['pending', 'processing'] },
+        },
+      }),
+      prisma.submission.count({
+        where: {
+          createdAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          },
+        },
+      }),
+    ]);
+
+    // Get average pricing confidence
+    const pricingStats = await prisma.marketAnalysis.aggregate({
+      _avg: {
+        overallConfidence: true,
+        marketAverage: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    // Get recent research jobs
+    const recentJobs = await prisma.marketResearchJob.findMany({
+      where: {
+        status: 'completed',
+      },
+      orderBy: {
+        completedAt: 'desc',
+      },
+      take: 10,
+      include: {
+        submission: {
+          select: {
+            ticketNumber: true,
+            year: true,
+            make: true,
+            model: true,
+          },
+        },
+      },
+    });
+
+    // Calculate success rate
+    const jobStats = await prisma.marketResearchJob.groupBy({
+      by: ['status'],
+      _count: {
+        status: true,
+      },
+    });
+
+    const totalJobs = jobStats.reduce((sum, stat) => sum + stat._count.status, 0);
+    const completedJobs = jobStats.find(s => s.status === 'completed')?._count.status || 0;
+    const successRate = totalJobs > 0 ? Math.round((completedJobs / totalJobs) * 100) : 0;
+
+    res.json({
+      overview: {
+        totalSubmissions,
+        submissionsWithPricing,
+        pricingCoverage: totalSubmissions > 0
+          ? Math.round((submissionsWithPricing / totalSubmissions) * 100)
+          : 0,
+        completedToday,
+        pendingResearchJobs,
+      },
+      pricing: {
+        averageConfidence: pricingStats._avg.overallConfidence || 0,
+        averageMarketValue: pricingStats._avg.marketAverage || 0,
+        totalAnalyses: pricingStats._count.id,
+      },
+      research: {
+        totalJobs,
+        completedJobs,
+        successRate,
+        pendingJobs: pendingResearchJobs,
+      },
+      recentActivity: recentJobs.map(job => ({
+        jobId: job.id,
+        ticketNumber: job.submission.ticketNumber,
+        vehicle: `${job.submission.year} ${job.submission.make} ${job.submission.model}`,
+        completedAt: job.completedAt,
+        duration: job.startedAt && job.completedAt
+          ? Math.round((job.completedAt.getTime() - job.startedAt.getTime()) / 1000)
+          : null,
+      })),
+    });
+  } catch (error: any) {
+    console.error('Get dashboard stats error:', error);
+    res.status(500).json({ error: 'Failed to retrieve dashboard statistics' });
   }
 }
 

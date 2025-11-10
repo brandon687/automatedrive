@@ -6,6 +6,9 @@ import {
   forwardToDealer,
   exportSubmissionMedia,
   generateShareableLink,
+  getSubmissionPricing,
+  refreshSubmissionPricing,
+  getDashboardStats,
 } from '../controllers/admin.controller';
 
 const router = Router();
@@ -30,5 +33,14 @@ router.get('/submissions/:id/share', generateShareableLink);
 
 // Export submission media as ZIP
 router.get('/submissions/:id/export', exportSubmissionMedia);
+
+// Get detailed pricing data with state-by-state breakdown
+router.get('/submissions/:id/pricing', getSubmissionPricing);
+
+// Manually refresh pricing research
+router.post('/submissions/:id/refresh-pricing', refreshSubmissionPricing);
+
+// Get dashboard statistics
+router.get('/dashboard/stats', getDashboardStats);
 
 export default router;
